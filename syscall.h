@@ -28,3 +28,8 @@
 #define SYS_getTurnaroundTime 27
 #define SYS_getWaitingTime 28
 #define SYS_getCpuBurstTime 29
+#define SYS_setPriority 30
+#define SYS_changePolicy 31
+#define SYS_getAllTurnTime 32
+#define SYS_getAllWaitingTime 33
+#define SYS_getAllRunningTime 34

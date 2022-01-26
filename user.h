@@ -31,6 +31,11 @@ int join(void);
 int getTurnaroundTime(int pid);
 int getWaitingTime(int pid);
 int getCpuBurstTime(int pid);
+int setPriority(int pid, int priority);
+int changePolicy(int myPolicy);
+int getAllTurnTime(void);
+int getAllWaitingTime(void);
+int getAllRunningTime(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

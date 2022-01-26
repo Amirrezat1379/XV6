@@ -9,7 +9,7 @@ int stack[4096] __attribute__ ((aligned (4096)));
 
 int main(int argc, char *argv[])
 {
-    // changePolicy(1);
+    changePolicy(0);
     int main_pid = getpid();
     int sum = 0;
     int s[1];
@@ -33,9 +33,9 @@ int main(int argc, char *argv[])
 
         int thisPid = getpid(); 
         int turnAroundTime = getTurnaroundTime(thisPid);
-        wait();
         int waitingTime = getWaitingTime(thisPid);
         int cbpTime = getCpuBurstTime(thisPid);
+        wait();
         printf(1,"cccccccccccppppptttttttttt %d\n",cbpTime);
         sum=cbpTime;
         s[0] += sum;
@@ -53,8 +53,10 @@ int main(int argc, char *argv[])
 
     } else {
         wait();
-        int t = s[0];
-        printf(1,"assqwqwqwqwqdewwdweaw %d",t);
+        // int t = s[0];
+        printf(1,"average Turnaround time = %d\n",getAllTurnTime() / NUM);
+        printf(1,"average waiting time = %d\n",getAllWaitingTime() / NUM);
+        printf(1,"average running time = %d\n",getAllRunningTime() / NUM);
 
         // int turnarounds[NUM] = {0}; // turnaround times for each child
         // int waitings[NUM] = {0};    // waiting times for each child

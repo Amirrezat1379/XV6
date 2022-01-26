@@ -101,7 +101,12 @@ exec(char *path, char **argv)
   curproc->tf->esp = sp;
   curproc->threads = 1;
   curproc->stackTop = sp;
-  curproc->priority = 3;
+
+  // curproc->readyTime = 0;
+  // curproc->priority = 3;
+  // curproc->runningTime = 0;
+  // curproc->sleepingTime = 0;
+  // curproc->turnTime = 0;
   switchuvm(curproc);
   freevm(oldpgdir);
   return 0;

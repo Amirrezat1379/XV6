@@ -14,12 +14,21 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
+struct {
+  struct proc process;
+  struct multyLevelQueue *next;
+} multyLevelQueue;
+
+// struct multyLevelQueue myQueues[6];
+
 static struct proc *initproc;
 
 struct spinlock thread;
 
-
+int currentPriority = 3;
 int nextpid = 1;
+int policy = 0;
+
 extern void forkret(void);
 extern void trapret(void);
 
@@ -106,7 +115,7 @@ found:
   p->stackTop = -1;
   p->threads = -1;
 
-  p->readyTime = 0;
+  p->readyTime =0;
   p->priority = 3;
   p->runningTime = 0;
   p->sleepingTime = 0;
@@ -496,6 +505,67 @@ wait(void)
   }
 }
 
+// int customWait(int *procTimes)
+// {
+//   struct proc *p;
+//   int havekids, pid;
+//   struct proc *curproc = myproc();
+
+//   acquire(&ptable.lock);
+//   for (;;)
+//   {
+//     // Scan through table looking for exited children.
+//     havekids = 0;
+//     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+//     {
+//       if (p->parent != curproc)
+//         continue;
+//       havekids = 1;
+//       if (p->state == ZOMBIE)
+//       {
+//         // Found one.
+//         // store process times for further calculations
+//         // All happens when Custom Wait is Called
+//         int turnAroundTime = getTurnAroundTime(p->pid);
+//         int waitingTime = getWaitingTime(p->pid);
+//         int cbt = getCBT(p->pid);
+
+//         procTimes[0] = turnAroundTime;
+//         procTimes[1] = waitingTime;
+//         procTimes[2] = cbt;
+//         procTimes[3] = p->priority;
+
+//         pid = p->pid;
+//         kfree(p->kstack);
+//         p->kstack = 0;
+//         freevm(p->pgdir);
+//         p->pid = 0;
+//         p->parent = 0;
+//         p->name[0] = 0;
+//         p->killed = 0;
+//         p->state = UNUSED;
+
+//         // // Reset time spent in each state, for the next call.
+//         // p->sleeping_t = 0;
+//         // p->runnable_t = 0;
+//         // p->running_t = 0;
+//         release(&ptable.lock);
+//         return pid;
+//       }
+//     }
+
+//     // No point waiting if we don't have any children.
+//     if (!havekids || curproc->killed)
+//     {
+//       release(&ptable.lock);
+//       return -1;
+//     }
+
+//     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
+//     sleep(curproc, &ptable.lock); //DOC: wait-sleep
+//   }
+// }
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -508,41 +578,100 @@ void
 scheduler(void)
 {
   struct proc *p;
+  struct proc *staredProc = 0;
   struct cpu *c = mycpu();
+  int run = 0;
+
   c->proc = 0;
-  
+
   for(;;){
     // Enable interrupts on this processor.
     sti();
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
+    if (policy == 0) {
+      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+        if(p->state != RUNNABLE)
+          continue;
+        c->proc = p;
+        switchuvm(p);
+        p->state = RUNNING;
+
+        swtch(&(c->scheduler), p->context);
+        switchkvm();
+
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+      }
+    }
+
+    if (policy == 1) {
+      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+        if (p->state == RUNNABLE) {
+          staredProc = p;
+          run = 1;
+          break;
+        }
+      }
+      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+        if(p->state != RUNNABLE)
+          continue;
+        if (p->priority < staredProc->priority) {
+          staredProc = p;
+        }
+      }
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
+      if (run) {
+        c->proc = staredProc;
+        switchuvm(staredProc);
+        staredProc->state = RUNNING;
 
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
+        swtch(&(c->scheduler), staredProc->context);
+        switchkvm();
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+      }
     }
     release(&ptable.lock);
 
   }
 }
 
+int setPriority(int pid, int priority) {
+  struct proc *p;
+  int r = 0;
+  
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    // sleep((void*) 1, &ptable.lock);
+    if (p->pid == pid) {
+      if (p->priority != priority)
+      p->priority = priority;
+      r = 1;
+    }
+  }
+  release(&ptable.lock);
+
+  return r;
+}
+
+int changePolicy(int myPolicy) {
+  if (myPolicy >= 0 && myPolicy < 5) {
+    policy = myPolicy;
+    return 0;
+  }
+  return 1;
+}
+
 void updateTimes(void) {
   struct proc *p;
-  
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {  
     if (p->state == RUNNING)
       p->runningTime = p->runningTime + 1;
@@ -553,35 +682,56 @@ void updateTimes(void) {
   }
 }
 
+int allTurnTime = 0;
+
 int getTurnaroundTime(int pid) {
   struct proc *p;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
     if (p->pid == pid) {
       p->turnTime = p->sleepingTime + p->readyTime + p->runningTime;
+      allTurnTime = p->turnTime + allTurnTime;
       return p->sleepingTime + p->readyTime + p->runningTime;
     }
   }
   return 0;
 }
 
+int getAllTurnTime(void) {
+  return allTurnTime;
+}
+
+int allWaitingTime = 0;
+
 int getWaitingTime(int pid) {
   struct proc *p;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
     if (p->pid == pid) {
+      allWaitingTime = allWaitingTime + p->turnTime - p->runningTime;
       return p->turnTime - p->runningTime;
     }
   }
   return 0;
 }
 
+int getAllWaitingTime(void) {
+  return allWaitingTime;
+}
+
+int allRunningTime = 0;
+
 int getCpuBurstTime(int pid) {
   struct proc *p;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
     if (p->pid == pid) {
+      allRunningTime = allRunningTime + p->runningTime;
       return p->runningTime;
     }
   }
   return 0;
+}
+
+int getAllRunningTime(void) {
+  return allRunningTime;
 }
 
 // Enter scheduler.  Must hold only ptable.lock

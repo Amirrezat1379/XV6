@@ -111,6 +111,11 @@ extern int sys_join(void);
 extern int sys_getTurnaroundTime(void);
 extern int sys_getWaitingTime(void);
 extern int sys_getCpuBurstTime(void);
+extern int sys_setPriority(void);
+extern int sys_changePolicy(void);
+extern int sys_getAllTurnTime(void);
+extern int sys_getAllWaitingTime(void);
+extern int sys_getAllRunningTime(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -142,6 +147,11 @@ static int (*syscalls[])(void) = {
 [SYS_getTurnaroundTime] sys_getTurnaroundTime,
 [SYS_getWaitingTime] sys_getWaitingTime,
 [SYS_getCpuBurstTime] sys_getCpuBurstTime,
+[SYS_setPriority] sys_setPriority,
+[SYS_changePolicy] sys_changePolicy,
+[SYS_getAllTurnTime] sys_getAllTurnTime,
+[SYS_getAllWaitingTime] sys_getAllWaitingTime,
+[SYS_getAllRunningTime] sys_getAllRunningTime
 };
 
 void

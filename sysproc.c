@@ -142,3 +142,35 @@ int sys_getCpuBurstTime(void) {
     return -1;
   return getCpuBurstTime(pid);
 }
+
+int sys_setPriority(void) {
+  int pid;
+  int priority;
+
+  if(argint(0, &pid) < 0)
+    return -1;
+  if(argint(0, &priority) < 0)
+    return -1;
+  return setPriority(pid, priority);
+}
+
+int sys_changePolicy(void) {
+  int myPolicy;
+
+  if(argint(0, &myPolicy) < 0)
+    return -1;
+
+  return changePolicy(myPolicy);
+}
+
+int sys_getAllTurnTime(void) {
+  return getAllTurnTime();
+}
+
+int sys_getAllWaitingTime(void) {
+  return getAllWaitingTime();
+}
+
+int sys_getAllRunningTime(void) {
+  return getAllRunningTime();
+}

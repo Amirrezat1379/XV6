@@ -129,6 +129,12 @@ int             getTurnaroundTime(int pid);
 int             getWaitingTime(int pid);
 int             getCpuBurstTime(int pid);
 void            updateTimes(void);
+int             setPriority(int pid, int priority);
+void            checkPriority(void);
+int             changePolicy(int myPolicy);
+int             getAllTurnTime(void);
+int             getAllWaitingTime(void);
+int             getAllRunningTime(void);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

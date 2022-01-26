@@ -186,6 +186,7 @@ UPROGS=\
 	_getReadCountTest\
 	_threads\
 	_threadsTest\
+	_priorityTest\
 	_rrtest\
 
 fs.img: mkfs README $(UPROGS)
@@ -264,6 +265,7 @@ EXTRA=\
 	getReadCountTest.c\
 	threads.c\
 	threadsTest.c\
+	priorityTest.c\
 	rrtest.c\
 
 dist:
