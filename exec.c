@@ -95,14 +95,18 @@ exec(char *path, char **argv)
 
   // Commit to the user image.
   oldpgdir = curproc->pgdir;
- 
   curproc->pgdir = pgdir;
   curproc->sz = sz;
   curproc->tf->eip = elf.entry;  // main
   curproc->tf->esp = sp;
-  curproc->stacktop = sp;
-  // priority of child should be higher
-  curproc->priority = 2;
+  curproc->threads = 1;
+  curproc->stackTop = sp;
+
+  // curproc->readyTime = 0;
+  // curproc->priority = 3;
+  // curproc->runningTime = 0;
+  // curproc->sleepingTime = 0;
+  // curproc->turnTime = 0;
   switchuvm(curproc);
   freevm(oldpgdir);
   return 0;

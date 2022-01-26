@@ -120,13 +120,22 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-// new system calls functions
+int             getHelloWorld(void);
 int             getProcCount(void);
 int             getReadCount(void);
-int             threadCreate(void * stack, int status);
-int             threadWait(void);
-int             cps(void);
-int             changePriorityOfProcess(int pid, int priority); 
+int             thread_create (void* stack);
+int             join(void);
+int             getTurnaroundTime(int pid);
+int             getWaitingTime(int pid);
+int             getCpuBurstTime(int pid);
+void            updateTimes(void);
+int             setPriority(int pid, int priority);
+void            checkPriority(void);
+int             changePolicy(int myPolicy);
+int             getAllTurnTime(void);
+int             getAllWaitingTime(void);
+int             getAllRunningTime(void);
+int             getQuantumTime(void);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

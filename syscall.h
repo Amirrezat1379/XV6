@@ -20,10 +20,16 @@
 #define SYS_link   19
 #define SYS_mkdir  20
 #define SYS_close  21
-// new system calls
-#define SYS_getProcCount 22
-#define SYS_getReadCount 23
-#define SYS_threadCreate 24
-#define SYS_threadWait 25
-#define SYS_cps 26
-#define SYS_changePriorityOfProcess 27
+#define SYS_getHelloWorld 22
+#define SYS_getProcCount 23
+#define SYS_getReadCount 24
+#define SYS_thread_create 25
+#define SYS_join 26
+#define SYS_getTurnaroundTime 27
+#define SYS_getWaitingTime 28
+#define SYS_getCpuBurstTime 29
+#define SYS_setPriority 30
+#define SYS_changePolicy 31
+#define SYS_getAllTurnTime 32
+#define SYS_getAllWaitingTime 33
+#define SYS_getAllRunningTime 34

@@ -6,10 +6,6 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
-//#include "umalloc.c"
-//#include <stdlib.h>
-
-//extern int readCount;
 
 int
 sys_fork(void)
@@ -17,11 +13,23 @@ sys_fork(void)
   return fork();
 }
 
+int sys_thread_create(void) {
+  int stackptr = 0;
+  if (argint(0, &stackptr) < 0) {
+    return -1;
+  }
+  return thread_create((void*) stackptr);
+}
+
 int
 sys_exit(void)
 {
   exit();
   return 0;  // not reached
+}
+
+int sys_join(void) {
+  return join();
 }
 
 int
@@ -94,104 +102,75 @@ sys_uptime(void)
   return xticks;
 }
 
+int
+sys_getHelloWorld(void) {
+  return getHelloWorld();
+}
 
 int
-sys_getProcCount(void)
-{
+sys_getProcCount(void) {
   return getProcCount();
-} 
-
-int
-sys_getReadCount(void)
-{
-  return getReadCount();
 }
 
-// threadCreator as a systemcall and gets
-// function pointer, void* arg and status as parameter
-int
-sys_threadCreate(void){
-  /*void *arg, *fn;
-  void * stack;
-  int status;
-  void * fptr = (void *)malloc(2 * PGSIZE);
-  struct proc * curproc = myproc();
-	
-	if(argint(0, &fn) < 0
-		|| argint(1, &arg) < 0
-		|| argint(2, &status, 4) < 0)
-		return -1;*/
-	
-  //cprintf("inside sys_clone %d\n", (uint)stack);
+extern int readCount;
 
-	// check the stack is page aligned
-  //int mod = (uint)fptr % PGSIZE;
-  //if (mod == 0)
-    //stack = fptr;
-  //else
-    //stack = fptr + (PGSIZE - mod);  
-	//if ((uint)stack % PGSIZE != 0)
-		//return -1;
-	
-	/*//check if the address space is less than one page 
-	if (curproc->sz - (uint)stack < PGSIZE)
-		return -1;*/
-	// call the create method in proc.c
-  // and save the child's threadID
-  //int child_tid = threadCreate((void *) stack);
-	//int child_tid = threadCreate(fn, arg1, arg2, stack);
-  // thread creation failed 
-  //if (child_tid < 0)
-    //cprintf("clone failed\n");
-  //else if (child_tid == 0){
-    // when the work is done with threads,
-    // stack should be emptied
-    //cprintf("salap");
-    //kfree(stack);
-    //kfree(curproc->kstack);
-    //curproc->kstack = 0;
-    //exit();
-  //}  
-   /*void *fptr = malloc((uint)2 * 4096);
-    void * stack;
-    int mod = (uint)fptr % 4096;
-    if (mod == 0)
-     stack = fptr;
-    else
-     stack = fptr + (4096 - mod); 
-
-  return threadCreate(stack);*/
-  int stack, status;
-  cprintf("salap\n");
-  if (argint(0, &stack) < 0 || argint(1, &status) < 0){
-    return -1;
-  }
-  return threadCreate((void *) stack, (int) status);
-  //return child_tid;
-
+int sys_getReadCount(void) {
+  cprintf("%d", readCount);
+  return readCount;
 }
 
-//This system call waits for a child thread that shares the address space with the 
-//calling process.  It returns the PID of waited-for child or -1 if none. 
-int
-sys_threadWait(void) {
-  //cprintf("inside sys_join %d\n", (uint)(*(char**)stack));
-	return threadWait();
-}
+int sys_getTurnaroundTime(void) {
+  int pid;
 
-int
-sys_cps(void){
-  return cps();
-}
-
-int
-sys_changePriorityOfProcess(void)
-{
-  int pid, priority;
   if(argint(0, &pid) < 0)
     return -1;
-  if(argint(1, &priority) < 0)
+  return getTurnaroundTime(pid);
+}
+
+int sys_getWaitingTime(void) {
+  int pid;
+
+  if(argint(0, &pid) < 0)
+    return -1;
+  return getWaitingTime(pid);
+}
+
+int sys_getCpuBurstTime(void) {
+  int pid;
+
+  if(argint(0, &pid) < 0)
+    return -1;
+  return getCpuBurstTime(pid);
+}
+
+int sys_setPriority(void) {
+  int pid;
+  int priority;
+
+  if(argint(0, &pid) < 0)
+    return -1;
+  if(argint(0, &priority) < 0)
+    return -1;
+  return setPriority(pid, priority);
+}
+
+int sys_changePolicy(void) {
+  int myPolicy;
+
+  if(argint(0, &myPolicy) < 0)
     return -1;
 
-  return changePriorityOfProcess(pid, priority);
+  return changePolicy(myPolicy);
+}
+
+int sys_getAllTurnTime(void) {
+  return getAllTurnTime();
+}
+
+int sys_getAllWaitingTime(void) {
+  return getAllWaitingTime();
+}
+
+int sys_getAllRunningTime(void) {
+  return getAllRunningTime();
 }

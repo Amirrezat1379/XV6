@@ -7,24 +7,11 @@ struct cpu {
   volatile uint started;       // Has the CPU started?
   int ncli;                    // Depth of pushcli nesting.
   int intena;                  // Were interrupts enabled before pushcli?
-  // pointer to current cpu
-  //struct cpu * cpu;
   struct proc *proc;           // The process running on this cpu or null
 };
 
 extern struct cpu cpus[NCPU];
 extern int ncpu;
-
-// Per-CPU variables, holding pointers to the
-// current cpu and to the current process.
-// The asm suffix tells gcc to use "%gs:0" to refer to cpu
-// and "%gs:4" to refer to proc.  seginit sets up the
-// %gs segment register so that %gs refers to the memory
-// holding those two variables in the local cpu's struct cpu.
-// This is similar to how thread-local variables are implemented
-// in thread libraries such as Linux pthreads.
-//extern struct cpu *cpu asm("%gs:0");       // &cpus[cpunum()]
-//extern struct proc *proc asm("%gs:4");     // cpus[cpunum()].proc
 
 //PAGEBREAK: 17
 // Saved registers for kernel context switches.
@@ -51,11 +38,11 @@ enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 struct proc {
   uint sz;                     // Size of process memory (bytes)
   pde_t* pgdir;                // Page table
-  uint stacktop;                // top of the stack
-  int threads;                 // number of threads the process has
   char *kstack;                // Bottom of kernel stack for this process
   enum procstate state;        // Process state
   int pid;                     // Process ID
+  int threads;
+  int stackTop;
   struct proc *parent;         // Parent process
   struct trapframe *tf;        // Trap frame for current syscall
   struct context *context;     // swtch() here to run process
@@ -64,10 +51,12 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
-  // new attributes for process
-  int readCount;               // counts how many times 'read' system call is called(new attribute added)
-  //void * stack;              // pointer to the stack for each thread
-  int priority;                // stores priority of each process 
+  int runningTime;
+  int sleepingTime;
+  int readyTime;
+  int turnTime;
+  int priority;
+  int quantum_time;
 };
 
 // Process memory is laid out contiguously, low addresses first:

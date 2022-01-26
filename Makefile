@@ -143,7 +143,7 @@ tags: $(OBJS) entryother.S _init
 vectors.S: vectors.pl
 	./vectors.pl > vectors.S
 
-ULIB = ulib.o usys.o printf.o umalloc.o
+ULIB = ulib.o usys.o printf.o umalloc.o thread_creator.o
 
 _%: %.o $(ULIB)
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
@@ -181,12 +181,15 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
+	_sysTest\
 	_getProcCountTest\
 	_getReadCountTest\
-	_thread_test\
-	_threadCreatorTest\
-	_printAllProcessState\
-	_dpro\
+	_threads\
+	_threadsTest\
+	_priorityTest\
+	_rrtest\
+	_smlTest\
+
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -259,12 +262,15 @@ EXTRA=\
 	printf.c umalloc.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
+	sysTest.c\
 	getProcCountTest.c\
 	getReadCountTest.c\
-	thread_test.c\
-	threadCreatorTest.c\
-	printAllProcessState.c\
-	dpro.c\
+	threads.c\
+	threadsTest.c\
+	priorityTest.c\
+	rrtest.c\
+	smlTest.c\
+	
 
 dist:
 	rm -rf dist

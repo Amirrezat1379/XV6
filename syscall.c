@@ -82,8 +82,6 @@ argstr(int n, char **pp)
   return fetchstr(addr, pp);
 }
 
-int readCount = 0;
-
 extern int sys_chdir(void);
 extern int sys_close(void);
 extern int sys_dup(void);
@@ -105,13 +103,19 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
-// new system calls
+extern int sys_getHelloWorld(void);
 extern int sys_getProcCount(void);
 extern int sys_getReadCount(void);
-extern int sys_threadCreate(void);
-extern int sys_threadWait(void);
-extern int sys_cps(void);
-extern int sys_changePriorityOfProcess(void);
+extern int sys_thread_create(void);
+extern int sys_join(void);
+extern int sys_getTurnaroundTime(void);
+extern int sys_getWaitingTime(void);
+extern int sys_getCpuBurstTime(void);
+extern int sys_setPriority(void);
+extern int sys_changePolicy(void);
+extern int sys_getAllTurnTime(void);
+extern int sys_getAllWaitingTime(void);
+extern int sys_getAllRunningTime(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -135,13 +139,19 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
-// new system calls
+[SYS_getHelloWorld] sys_getHelloWorld,
 [SYS_getProcCount] sys_getProcCount,
 [SYS_getReadCount] sys_getReadCount,
-[SYS_threadCreate] sys_threadCreate,
-[SYS_threadWait] sys_threadWait,
-[SYS_cps] sys_cps,
-[SYS_changePriorityOfProcess] sys_changePriorityOfProcess,
+[SYS_thread_create]    sys_thread_create,
+[SYS_join]    sys_join,
+[SYS_getTurnaroundTime] sys_getTurnaroundTime,
+[SYS_getWaitingTime] sys_getWaitingTime,
+[SYS_getCpuBurstTime] sys_getCpuBurstTime,
+[SYS_setPriority] sys_setPriority,
+[SYS_changePolicy] sys_changePolicy,
+[SYS_getAllTurnTime] sys_getAllTurnTime,
+[SYS_getAllWaitingTime] sys_getAllWaitingTime,
+[SYS_getAllRunningTime] sys_getAllRunningTime
 };
 
 void
@@ -151,11 +161,6 @@ syscall(void)
   struct proc *curproc = myproc();
 
   num = curproc->tf->eax;
-  // checking if the system call number is equal to sys_read 
-  // and if it is, the readCount increases by 1
-  if (num == SYS_read){    
-    curproc->readCount++;
-  }
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     curproc->tf->eax = syscalls[num]();
   } else {

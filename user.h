@@ -23,14 +23,19 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-// new system calls
+int getHelloWorld(void);
 int getProcCount(void);
 int getReadCount(void);
-int threadCreate(void * stack, int status);
-int threadWait(void);
-int threadCreator(void (*fn) (void *), void*, int);
-int cps(void);
-int changePriorityOfProcess(int pid, int priority);
+int thread_create(void* stack);
+int join(void);
+int getTurnaroundTime(int pid);
+int getWaitingTime(int pid);
+int getCpuBurstTime(int pid);
+int setPriority(int pid, int priority);
+int changePolicy(int myPolicy);
+int getAllTurnTime(void);
+int getAllWaitingTime(void);
+int getAllRunningTime(void);
 
 // ulib.c
 int stat(const char*, struct stat*);
@@ -45,3 +50,4 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+int thread_creator(void (*fn) (void*), void *arg);
